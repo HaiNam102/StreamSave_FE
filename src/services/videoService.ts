@@ -22,7 +22,7 @@ export const videoService = {
     return response.data.data;
   },
 
-  initDownload: async (payload: { videoUrl: string, formatId: String }): Promise<string> => {
+  initDownload: async (payload: { videoUrl: string, formatId: number }): Promise<string> => {
     const response = await apiClient.post<ApiResponse<string>>('/download', payload);
     return response.data.data;
   },

@@ -8,6 +8,7 @@ export const useVideoDownloader = () => {
     const [taskId, setTaskId] = useState<string | null>(null);
     const [currentStatus, setCurrentStatus] = useState<Status | null>(null);
     const [loading, setLoading] = useState(false);
+    const [downloadingFormatId, setDownloadingFormatId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null); // New state for error handling
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -42,6 +43,7 @@ export const useVideoDownloader = () => {
 
     const handleDownload = useCallback(async (formatId: number) => {
         setError(null);
+        setDownloadingFormatId(formatId);
         try {
             const responseTaskId = await videoService.initDownload({
                 videoUrl: url,
@@ -52,12 +54,16 @@ export const useVideoDownloader = () => {
         } catch (err: any) {
             setError(err.message || 'Lỗi không xác định khi khởi tạo tải xuống.');
             setCurrentStatus('FAILED');
+            setDownloadingFormatId(null);
         }
     }, [url]);
 
     useEffect(() => {
         if (!taskId) {
             stopPolling();
+            if (currentStatus !== 'PROCESSING' && currentStatus !== 'PENDING') {
+                setDownloadingFormatId(null);
+            }
             return;
         }
 
@@ -71,6 +77,7 @@ export const useVideoDownloader = () => {
                     if (prevStatus !== newStatus) {
                         if (newStatus === 'COMPLETED' || newStatus === 'FAILED') {
                             stopPolling();
+                            setDownloadingFormatId(null);
                         }
                         return newStatus;
                     }
@@ -80,6 +87,7 @@ export const useVideoDownloader = () => {
             } catch (err: any) {
                 setError(err.message || "Lỗi khi kiểm tra trạng thái xử lý video.");
                 setCurrentStatus('FAILED');
+                setDownloadingFormatId(null);
                 stopPolling();
             }
         };
@@ -92,6 +100,17 @@ export const useVideoDownloader = () => {
         return () => stopPolling();
     }, [taskId]);
 
+    const handleReset = useCallback(() => {
+        setUrl('');
+        setVideoInfo(null);
+        setTaskId(null);
+        setCurrentStatus(null);
+        setError(null);
+        setLoading(false);
+        setDownloadingFormatId(null);
+        stopPolling();
+    }, []);
+
     return {
         url,
         setUrl,
@@ -99,8 +118,10 @@ export const useVideoDownloader = () => {
         taskId,
         currentStatus,
         loading,
+        downloadingFormatId,
         error,
         handleExtract,
-        handleDownload
+        handleDownload,
+        handleReset
     };
 };

@@ -19,9 +19,11 @@ export default function App() {
     taskId,
     currentStatus,
     loading,
+    downloadingFormatId,
     error,
     handleExtract,
-    handleDownload
+    handleDownload,
+    handleReset
   } = useVideoDownloader();
 
   return (
@@ -50,9 +52,12 @@ export default function App() {
         {videoInfo && (
           <div className="max-w-4xl mx-auto animate-fade-in-up">
             <VideoPreview
+              url={url}
               info={videoInfo}
               onDownload={handleDownload}
-              isDownloading={currentStatus === 'PROCESSING'}
+              onReset={handleReset}
+              downloadingFormatId={downloadingFormatId}
+              isDownloading={currentStatus === 'PROCESSING' || currentStatus === 'PENDING'}
             />
           </div>
         )}
