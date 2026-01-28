@@ -1,7 +1,10 @@
 import axios from "axios";
 import type { VideoInfoResponse, DownloadTasksRes, ApiResponse } from "../types/video";
 
-const API_BASE = 'http://localhost:8080/api/v1/video';
+// Use environment variable or fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+const API_BASE = `${API_BASE_URL}/v1/video`;
+const DOWNLOAD_API_BASE = `${API_BASE_URL}/v1/download`;
 
 // Tạo một instance để cấu hình dùng chung
 const apiClient = axios.create({
@@ -28,7 +31,7 @@ export const videoService = {
   },
 
   checkStatus: async (taskId: string): Promise<DownloadTasksRes> => {
-    const response = await axios.get<ApiResponse<DownloadTasksRes>>(`http://localhost:8080/api/v1/download/status/${taskId}`);
+    const response = await axios.get<ApiResponse<DownloadTasksRes>>(`${DOWNLOAD_API_BASE}/status/${taskId}`);
     return response.data.data;
   },
 
